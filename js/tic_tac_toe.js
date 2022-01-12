@@ -19,9 +19,9 @@ const c_3= document.getElementById("c_3");
 
 const mgstxt1 = '<p class="image"><img src="img/penguins.jpg" width = 61px height = 61px></p><p class="text">Penguins Attack!(your turn)</p>'
 const mgstxt2 = '<p class="image"><img src="img/whitebear.jpg" width = 61px height = 61px></p><p class="text">Bear Attack!(com turn)</p>'
-const mgstxt3 = '<p class="image"><img src="img/penguins.jpg" width = 61px height = 61px></p><p class="text animate_animated animate_lightSpeedInRight">Penguins Win</p>'
-const mgstxt4 = '<p class="image"><img src="img/whitebear.jpg" width = 61px height = 61px></p><p class="text animate_animated animate_lightSpeedInRight">Bear Win</p>'
-const mgstxt5 = '<p class="image"><img src="img/penguins.jpg" width = 61px height = 61px><img src="img/whitebear.jpg" width = 61px height = 61px></p><p class="text animate_bounceIn">Draw!!!</p>'
+const mgstxt3 = '<p class="image"><img src="img/penguins.jpg" width = 61px height = 61px></p><p class="text animate__animated animate__lightSpeedInRight">Penguins Win</p>'
+const mgstxt4 = '<p class="image"><img src="img/whitebear.jpg" width = 61px height = 61px></p><p class="text animate__animated animate__lightSpeedInRight">Bear Win</p>'
+const mgstxt5 = '<p class="image"><img src="img/penguins.jpg" width = 61px height = 61px><img src="img/whitebear.jpg" width = 61px height = 61px></p><p class="text animate__bounceIn">Draw!!!</p>'
 
 let gameSound = ["sound/click_sound1.mp3", "sound/click_sound2.mp3", "sound/penwin_sound.mp3", "sound/bearwin_sound.mp3", "sound/draw_sound.mp3"];
 
@@ -64,12 +64,12 @@ squaresArray.forEach(square=>{
     square.addEventListener("click", ()=>{
         let gammeOverFlg = isSelect(square);
 
-        if(gammeOverFlg===0){
+        if(gammeOverFlg==="0"){
             const squaresBox = document.getElementById("squaresBox");
             squaresBox.classList.add("js-unclickable");
             setTimeout(() => {
                 bearTurn();
-            }, 2000);
+            }, "1000");
         }
     })
 })
@@ -84,7 +84,7 @@ function isSelect(selectSquare){
 
         selectSquare.classList.add("js-pen-checked");
         selectSquare.classList.add("js-unclickable");
-        selectSquare.classList.add("js-clickable");
+        selectSquare.classList.remove("js-clickable");
         //penWin
         if(isWinner("penguins")){
             setMessage("pen-win");
@@ -101,7 +101,7 @@ function isSelect(selectSquare){
 
         selectSquare.classList.add("js-bear-checked");
         selectSquare.classList.add("js-unclickable");
-        selectSquare.classList.add("js-clickable");
+        selectSquare.classList.remove("js-clickable");
 
         //bearWin
         if(isWinner("bear")){
@@ -121,7 +121,7 @@ function isSelect(selectSquare){
         gameOver("draw");
         return gameOverFlg="1";
     }
-    return gameOverFlg= "0"
+    return gameOverFlg= "0";
 }
 
 function isWinner(symbol){
@@ -254,8 +254,63 @@ function gameOver( status ){
 //com play\
 
 function bearTurn(){
-    gameOverFlg= "0";
-    const bearSquare =squaresArray.filter(square=>{
-        if(square.classList.contains("js-clickable")) return bearSquare;
+    let bearTurnEnd="0";
+    let gameOverFlg= "0";
+    while(bearTurnEnd==="0"){
+
+    bearTurnEnd= isReach("bear");
+    if(bearTurnEnd==="1"){
+        gameOverFlg="1";
+        break;
+    }
+
+    bearTurnEnd = isReach("penguins");
+    if(bearTurnEnd==="1"){
+        break;
+    }
+
+    const bearSquare=[];
+    squaresArray.filter(square=>{
+        if(square.classList.contains("js-clickable")) {
+            bearSquare.push(square);
+        };
+        return bearSquare
     })
+    const n=Math.floor(Math.random() * bearSquare.length);
+    gameOverFlg = isSelect(bearSquare[n]);
+    break;
+    }   
+    if(gameOverFlg==="0") squaresBox.classList.remove("js-unclickable");
+}
+
+//reach func
+
+function isReach(status){
+    let bearTurnEnd = "0";
+    lineArray.some(line => {
+        let bearCheckCnt = 0;
+        let penCheckCnt = 0;
+
+        line.forEach(square => {
+            if(square.classList.contains("js-bear-checked")) bearCheckCnt++;
+            if(square.classList.contains("js-pen-checked")) penCheckCnt++;
+        });
+
+        if(status === "bear" && bearCheckCnt === 2 && penCheckCnt === 0){
+            bearTurnEnd = "1";
+        }
+        if(status === "penguins" && bearCheckCnt === 0 && penCheckCnt === 2){
+            bearTurnEnd = "1";
+        }
+        
+        if(bearTurnEnd === "1"){
+            line.some(square => {
+                if(square.classList.contains("js-clickable")){
+                    isSelect(square);
+                }
+            })
+            return true
+        }
+    })
+    return bearTurnEnd;
 }
